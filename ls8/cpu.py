@@ -1,13 +1,19 @@
 """CPU functionality."""
 
 import sys
+# Operations that we can perform
+HLT = 0b00000001
+LDI = 0b10000010 
+PRN = 0b01000111 
 
 class CPU:
     """Main CPU class."""
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.register = [0] * 8 
+        self.ram = [0] * 256
+        self.PC = 0 
 
     def load(self):
         """Load a program into memory."""
@@ -18,7 +24,7 @@ class CPU:
 
         program = [
             # From print8.ls8
-            0b10000010, # LDI R0,8
+            0b10000010, # LDI R0,8 
             0b00000000,
             0b00001000,
             0b01000111, # PRN R0
@@ -26,8 +32,8 @@ class CPU:
             0b00000001, # HLT
         ]
 
-        for instruction in program:
-            self.ram[address] = instruction
+        for cmd in program:
+            self.ram[address] = cmd
             address += 1
 
 
@@ -35,7 +41,7 @@ class CPU:
         """ALU operations."""
 
         if op == "ADD":
-            self.reg[reg_a] += self.reg[reg_b]
+            self.reg[reg_a] += self.reg[reg_b] 
         #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
@@ -59,7 +65,38 @@ class CPU:
             print(" %02X" % self.reg[i], end='')
 
         print()
+    
+    def ram_read(self, MAR):
+        return self.ram[MAR]
+
+    def ram_write(self, MAR, MDR):
+        self.ram[MAR] = MDR
 
     def run(self):
         """Run the CPU."""
-        pass
+
+        running = True
+
+        while running: 
+
+            cmd = self.ram[self.PC] #cmd is the address of the location of the program counter in memory
+
+            operand_a = self.ram_read(self.PC + 1)
+            operand_b = self.ram_read(self.PC + 2)
+
+            # print(cmd)
+ 
+            if cmd == HLT: 
+                running = False
+                self.PC += 1
+                
+            if cmd == LDI:
+                self.register[operand_a] = operand_b 
+                self.PC += 3 
+
+            if cmd == PRN:
+                print(self.register[operand_a]) 
+                self.PC += 2
+
+            else:  
+                print(f'unknown cmd: {cmd}')
