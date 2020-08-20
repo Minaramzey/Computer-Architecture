@@ -17,6 +17,8 @@ class CPU:
         self.register = [0] * 8 
         self.ram = [0] * 256
         self.PC = 0  
+        self.sp = 7
+        self.register[self.sp] = 0xf4
 
     def load(self, filename):
         # print(sys.argv)
@@ -130,5 +132,20 @@ class CPU:
                 self.alu(cmd, operand_a, operand_b)
                 self.PC += 3                
 
+            elif cmd == PUSH:
+                # Decrement SP
+                self.sp -= 1
+                # Get value from register
+                value = self.register[operand_a]
+                self.ram[self.sp]= value
+                self.PC += 2
+
+            elif cmd == POP:
+                #copy the value from the address pointed to by sp to the given register
+                value = self.ram[self.sp]
+                self.register[operand_a] = value
+                # Incrament SP
+                self.sp += 1
+                self.PC += 2           
             else:  
                 print(f'unknown cmd: {cmd}')
