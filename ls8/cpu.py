@@ -8,7 +8,9 @@ PRN = 0b01000111
 MUL = 0b10100010
 POP = 0b01000110
 PUSH = 0b01000101
-
+CALL = 0b01010000
+RET = 0b00010001
+ADD = 0b10100000
 class CPU:
     """Main CPU class."""
 
@@ -128,6 +130,10 @@ class CPU:
                 print(self.register[operand_a]) 
                 self.PC += 2
 
+            elif cmd == ADD:
+                self.register[operand_a] += self.register[operand_b]
+                self.PC += 3 
+
             elif cmd == MUL:
                 self.alu(cmd, operand_a, operand_b)
                 self.PC += 3                
@@ -146,6 +152,16 @@ class CPU:
                 self.register[operand_a] = value
                 # Incrament SP
                 self.sp += 1
-                self.PC += 2           
+                self.PC += 2  
+
+            elif cmd == CALL:
+                self.register[self.sp] -= 1
+                self.ram[self.register[self.sp]] = self.PC + 2
+                self.PC = self.register[operand_a]
+
+            elif cmd == RET:
+                self.PC = self.ram[self.register[self.sp]]
+                self.register[self.sp] += 1 
+
             else:  
                 print(f'unknown cmd: {cmd}')
